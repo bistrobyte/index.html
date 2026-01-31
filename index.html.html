@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BISTROBYTE - Site de Receitas da Faetec</title>
+    <link rel="icon" type="image/png" href="IMAGENS/logoBistro1.png" size="32x32">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; min-height: 100vh; }
+        
+        /* NAVBAR */
+        .navbar { background: #357abd; padding: 0.5rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; }
+        .nav-links { display: flex; gap: 0.5rem; list-style: none; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-size: 0.8rem; cursor: pointer; padding: 0.5rem 0.8rem; border-radius: 4px; transition: 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); }
+        
+        .search-container { background: white; border-radius: 20px; padding: 2px 12px; display: flex; align-items: center; margin-left: 10px; width: 180px; }
+        .search-container input { border: none; outline: none; width: 100%; font-size: 0.75rem; padding: 4px; }
+        .search-container span { color: #357abd; font-size: 0.9rem; cursor: pointer; }
+
+        .user-menu { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; }
+        .admin-box { background: #ffeb3b; color: #333; padding: 4px 12px; border-radius: 6px; font-weight: bold; border: 1px solid #fbc02d; }
+        .user-avatar-circle { width: 38px; height: 38px; border-radius: 50%; background: #eee; border: 2px solid white; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .user-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+        /* HERO BANNER - ALTERADO COM A NOVA IMAGEM */
+        .hero-banner { 
+            position: relative; 
+            width: 100%; 
+            height: 550px;
+            /* Caminho atualizado para a imagem que você enviou */
+            background: url(image_b0a210.jpg.jpeg) center/cover;
+            border-radius: 0 0 50px 50px; 
+            margin-bottom: 3rem;
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding: 0 8%;
+        }
+        .hero-glass-card {
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            padding: 3rem; 
+            border-radius: 25px;
+            max-width: 550px; 
+            color: rgb(7, 20, 17); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .hero-glass-card h1 { font-size: 2.5rem; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .hero-glass-card p { font-size: 1.1rem; line-height: 1.6; } colo
+
+        /* GRID DE RECEITAS EM QUADRADINHOS */
+        .section-title { color: #357abd; margin: 2rem 0 1.5rem 0; font-size: 1.5rem; }
+        .recipes-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 3rem; 
+        }
+
+        .recipe-square { 
+            aspect-ratio: 1 / 1; 
+            background: white; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            transition: 0.3s; 
+            cursor: pointer; 
+            position: relative;
+        }
+        .recipe-square:hover { transform: scale(1.03); }
+        .recipe-square img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .recipe-overlay { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(transparent, rgba(0,0,0,0.8)); 
+            color: white; 
+            text-align: center;
+        }
+        .recipe-overlay h3 { font-size: 1rem; }
+
+        .grid-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 10; }
+        .mini-btn { background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* SOBRE - TEXTO ORIGINAL INTEGRAL */
+        .main-card { background: white; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 2rem; }
+        .equipe-box { background: #f0f8ff; padding: 2rem; border-radius: 10px; margin-top: 2rem; }
+        .membros-lista { list-style: none; margin-top: 10px; columns: 2; }
+        .faetec-area { text-align: center; margin-top: 4rem; padding-bottom: 2rem; }
+        .faetec-img { max-width: 180px; }
+
+        /* FORMULÁRIO DE ADIÇÃO (ADMIN) */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #357abd; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* LOGIN */
+        .login-box { text-align: center; max-width: 420px; margin: 8rem auto; background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .btn-action { background: #4a90e2; color: white; border: none; padding: 0.9rem; border-radius: 8px; width: 100%; margin-bottom: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-action:hover { background: #357abd; }
+        /* AJUSTES PARA DISPOSITIVOS MÓVEIS (Celulares e Tablets) */
+@media (max-width: 768px) {
+    /* Ajuste da Barra de Navegação */
+    .navbar {
+        flex-direction: column;
+        padding: 1rem;
+        height: auto;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 10px;
+    }
+
+    .nav-links a {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+
+    .search-container {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .user-menu {
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    /* Ajuste do Banner Principal (Hero) */
+    .hero-banner {
+        height: 350px;
+        padding: 0 5%;
+        border-radius: 0 0 30px 30px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .hero-glass-card {
+        padding: 1.5rem;
+        max-width: 95%;
+    }
+
+    .hero-glass-card h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero-glass-card p {
+        font-size: 0.9rem;
+    }
+
+    /* Ajuste do Grid de Receitas (Muda de 4 para 2 colunas) */
+    .recipes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    /* Ajuste da Seção Sobre e Membros */
+    .main-card {
+        padding: 1.5rem;
+    }
+
+    .membros-lista {
+        columns: 1; /* Transforma a lista de membros em uma única coluna */
+    }
+
+    /* Ajuste da Tela de Login */
+    .login-box {
+        margin: 4rem auto;
+        width: 90%;
+        padding: 2rem 1.5rem;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <nav class="navbar" id="main-navbar" style="display: none;">
+        <div class="nav-links" id="nav-links-container">
+            <a onclick="navigateTo('home')">Página Principal</a>
+            <a onclick="navigateTo('receitas')">Receitas</a>
+            <a onclick="navigateTo('favoritos')">Favoritos</a>
+            <a onclick="navigateTo('sobre')">Sobre</a>
+            <div class="search-container">
+                <input type="text" placeholder="Buscar receitas...">
+                <span>🔍</span>
+            </div>
+        </div>
+        <div class="user-menu">
+            <div class="user-avatar-circle" onclick="changeUserPhoto()">
+                <img id="nav-user-img" src="https://www.w3schools.com/howto/img_avatar.png">
+            </div>
+            <span id="user-display-name"></span>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <div id="auth-screen" class="login-box">
+        <img src="IMAGENS/BISTROBYTE-removebg-preview.png" width="180" style="margin-bottom: 2rem;">
+        <div id="options-box">
+            <button class="btn-action" onclick="showForm()">Entrar</button>
+            <button class="btn-action" style="background:#5dade2" onclick="showForm()">Criar Conta</button>
+            <button class="btn-action" style="background:#95a5a6" onclick="enterAsVisitor()">Entrar como Visitante</button>
+        </div>
+        <div id="login-form" style="display:none">
+            <input type="text" id="l-user" placeholder="Usuário" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+            <input type="password" id="l-pass" placeholder="Senha" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+            <button class="btn-action" onclick="handleLogin()">Acessar Sistema</button>
+            <p onclick="resetAuth()" style="cursor:pointer; color:#4a90e2; font-size:0.85rem; margin-top:15px;">Voltar</p>
+        </div>
+    </div>
+
+    <div id="site-content" style="display: none;">
+        
+        <div class="page" id="home-page">
+            <div class="hero-banner">
+                <div class="hero-glass-card">
+                    <h1>Sua jornada culinária começa aqui.</h1>
+                    <p>Cozinhar nunca foi tão fácil. Encontre sua próxima refeição em segundos e descubra novos sabores.</p>
+                </div>
+            </div>
+            <div class="container">
+                <h2 class="section-title">Receitas em Destaque</h2>
+                <div class="recipes-grid" id="home-featured-display"></div>
+            </div>
+        </div>
+
+        <div class="page" id="sobre-page">
+            <div class="container">
+                <div class="main-card">
+                    <h2 style="color:#357abd; margin-bottom: 2rem; border-bottom: 2px solid #5dade2; display: inline-block; padding-bottom: 8px;">Sobre o Bistrô Byte</h2>
+                    <p>O Bistrô Byte é o resultado final de uma jornada intensa de aprendizado e dedicação no nosso Trabalho de Conclusão de Curso (TCC) de Informática.</p>
+                    <p style="margin-top: 15px;">O projeto nasceu de uma ideia inovadora: unir dois universos que parecem distantes, mas que possuem muito em comum: a precisão técnica da Informática e a liberdade criativa da Gastronomia.</p>
+
+                    <h3 style="color:#4a90e2; margin: 2.5rem 0 1.2rem 0;">Nossa Missão e Proposta</h3>
+                    <p>A proposta central do nosso trabalho foi explorar a interdisciplinaridade. Entendemos que a tecnologia não deve existir apenas por si só, mas sim como uma ferramenta para solucionar problemas e facilitar o dia a dia de outras áreas.</p>
+                    <p style="margin-top: 15px;">Por isso, utilizamos as melhores práticas de desenvolvimento de software para criar uma solução prática e inteligente para o setor culinário. Nosso foco foi transformar a complexidade por trás das linhas de código em uma plataforma amigável e intuitiva.</p>
+                    <p style="margin-top: 15px;">No Bistrô Byte, o usuário encontra um ambiente onde a paixão pela cozinha se une à eficiência digital, permitindo que o prazer de cozinhar seja o protagonista, apoiado por uma tecnologia sólida e funcional.</p>
+
+                    <div class="equipe-box">
+                        <p style="font-weight: bold; color: #357abd; margin-bottom: 15px;">Liderança e desenvolvimento</p>
+                        <ul class="membros-lista">
+                            <li>• <strong>Cauã Louvise</strong> – Líder</li>
+                            <li>• <strong>Gabriel Vieira</strong> – Sublíder</li>
+                            <li>• Caio Leonardo R.</li>
+                            <li>• José Pedro S.</li>
+                            <li>• Guilherme da Silva A.</li>
+                            <li>• Sabrina Eloi A.</li>
+                            <li>• Daniel Lucas D.</li>
+                            <li>• Igor Mateus A.</li>
+                        </ul>
+                    </div>
+                    <div class="faetec-area">
+                        <img src="IMAGENS/LOGOFAETEC.png" class="faetec-img" alt="Logo Faetec">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="receitas-page">
+            <div class="container">
+                <h2 class="section-title">Todas as Receitas</h2>
+                <div class="recipes-grid" id="recipe-display"></div>
+            </div>
+        </div>
+
+        <div class="page" id="favoritos-page">
+            <div class="container">
+                <h2 class="section-title">Meus Favoritos ❤️</h2>
+                <div class="recipes-grid" id="favorites-display"></div>
+            </div>
+        </div>
+
+        <div class="page" id="add-page">
+            <div class="container">
+                <div class="main-card" style="max-width: 700px; margin: 2rem auto;">
+                    <h2 style="color:#357abd; margin-bottom: 1.5rem;">Publicar Nova Receita</h2>
+                    
+                    <div class="form-group">
+                        <label>Nome da Receita</label>
+                        <input type="text" id="new-name" placeholder="Ex: Lasanha de Carne Moída">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Link da Foto (URL)</label>
+                        <input type="text" id="new-img" placeholder="Cole o link da imagem aqui">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ingredientes</label>
+                        <textarea id="new-ingredients" placeholder="Liste os ingredientes necessários..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Modo de Preparo</label>
+                        <textarea id="new-method" placeholder="Explique o passo a passo da receita..."></textarea>
+                    </div>
+
+                    <button class="btn-action" onclick="saveNewRecipe()">Salvar e Publicar Receita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados inicial
+        let recipes = JSON.parse(localStorage.getItem('bb_data')) || [
+            { id: 1, name: "Arroz Paraense", img: "https://i.imgur.com/hSDV0a6.jpeg" },
+            { id: 2, name: "Focaccia Tradicional", img: "https://i.imgur.com/owpiU2n.jpeg" },
+            { id: 3, name: "Tacos de Carne", img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500" },
+            { id: 4, name: "Torta de Limão", img: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=500" }
+        ];
+        
+        let currentUser = null;
+        let myFavorites = JSON.parse(localStorage.getItem('bb_favs')) || [];
+
+        function showForm() { document.getElementById('options-box').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; }
+        function resetAuth() { document.getElementById('options-box').style.display = 'block'; document.getElementById('login-form').style.display = 'none'; }
+        
+        function handleLogin() {
+            const u = document.getElementById('l-user').value;
+            const p = document.getElementById('l-pass').value;
+            // Validação Admin
+            if(u.toLowerCase() === 'admin' && p === '1234') {
+                currentUser = { name: 'admin', role: 'admin' };
+            } else {
+                currentUser = { name: u || 'Usuário', role: 'user' };
+            }
+            start();
+        }
+
+        function enterAsVisitor() { currentUser = { name: 'Visitante', role: 'visitor' }; start(); }
+
+        function start() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-navbar').style.display = 'flex';
+            document.getElementById('site-content').style.display = 'block';
+            
+            const nameArea = document.getElementById('user-display-name');
+            const navLinks = document.getElementById('nav-links-container');
+            
+            // Remove botão admin se já existir para não duplicar
+            const existingAddLink = document.getElementById('dynamic-add-link');
+            if(existingAddLink) existingAddLink.remove();
+
+            if(currentUser.role === 'admin') {
+                nameArea.innerHTML = `<span class="admin-box">${currentUser.name}</span>`;
+                // Cria link de Admin
+                const addLink = document.createElement('a');
+                addLink.id = 'dynamic-add-link';
+                addLink.innerText = 'Adicionar Receitas';
+                addLink.onclick = () => navigateTo('add');
+                // Insere antes do link "Sobre"
+                navLinks.insertBefore(addLink, navLinks.children[3]);
+            } else {
+                nameArea.innerText = currentUser.name;
+            }
+            
+            renderHomeFeatured();
+            navigateTo('home');
+        }
+
+        function navigateTo(p) {
+            if(p === 'add' && currentUser.role !== 'admin') {
+                alert("Acesso restrito ao administrador.");
+                return;
+            }
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(p + '-page').classList.add('active');
+            if(p === 'home') renderHomeFeatured();
+            if(p === 'receitas') render();
+            if(p === 'favoritos') renderFavorites();
+        }
+
+        function generateRecipeHTML(r, isFavoritePage = false) {
+            return `
+                <div class="recipe-square">
+                    <img src="${r.img}">
+                    <div class="grid-actions">
+                        <button class="mini-btn" onclick="event.stopPropagation(); toggleFav(${r.id})">
+                            ${myFavorites.includes(r.id) ? '❤️' : '🤍'}
+                        </button>
+                        ${(currentUser.role === 'admin' && !isFavoritePage) ? `<button class="mini-btn" style="color:red" onclick="event.stopPropagation(); deleteRecipe(${r.id})">🗑️</button>` : ''}
+                    </div>
+                    <div class="recipe-overlay"><h3>${r.name}</h3></div>
+                </div>
+            `;
+        }
+
+        function renderHomeFeatured() {
+            const container = document.getElementById('home-featured-display');
+            container.innerHTML = recipes.slice(0, 8).map(r => generateRecipeHTML(r)).join('');
+        }
+
+        function render() {
+            const container = document.getElementById('recipe-display');
+            container.innerHTML = recipes.map(r => generateRecipeHTML(r)).join('');
+        }
+
+        function renderFavorites() {
+            const container = document.getElementById('favorites-display');
+            const favs = recipes.filter(r => myFavorites.includes(r.id));
+            container.innerHTML = favs.length ? favs.map(r => generateRecipeHTML(r, true)).join('') : '<p style="text-align:center; width:100%; padding:20px;">Nenhum favorito salvo.</p>';
+        }
+
+        function toggleFav(id) {
+            if(currentUser.role === 'visitor') return alert("Faça login para salvar favoritos!");
+            if(myFavorites.includes(id)) myFavorites = myFavorites.filter(f => f !== id);
+            else myFavorites.push(id);
+            localStorage.setItem('bb_favs', JSON.stringify(myFavorites));
+            
+            const activePage = document.querySelector('.page.active').id;
+            if(activePage === 'home-page') renderHomeFeatured();
+            else if(activePage === 'receitas-page') render();
+            else renderFavorites();
+        }
+
+        function deleteRecipe(id) {
+            if(confirm("Tem certeza que deseja excluir esta receita?")) {
+                recipes = recipes.filter(r => r.id !== id);
+                localStorage.setItem('bb_data', JSON.stringify(recipes));
+                const activePage = document.querySelector('.page.active').id;
+                if(activePage === 'home-page') renderHomeFeatured();
+                else render();
+            }
+        }
+
+        function saveNewRecipe() {
+            const n = document.getElementById('new-name').value;
+            const i = document.getElementById('new-img').value;
+            const ing = document.getElementById('new-ingredients').value;
+            const meth = document.getElementById('new-method').value;
+
+            if(n && i) {
+                const newObj = { 
+                    id: Date.now(), 
+                    name: n, 
+                    img: i, 
+                    ingredients: ing, 
+                    method: meth 
+                };
+                recipes.push(newObj);
+                localStorage.setItem('bb_data', JSON.stringify(recipes));
+                
+                // Limpa campos
+                document.getElementById('new-name').value = "";
+                document.getElementById('new-img').value = "";
+                document.getElementById('new-ingredients').value = "";
+                document.getElementById('new-method').value = "";
+                
+                alert("Receita publicada com sucesso!");
+                navigateTo('receitas');
+            } else {
+                alert("Por favor, preencha ao menos o Nome e o Link da Imagem.");
+            }
+        }
+
+        function changeUserPhoto() {
+            const url = prompt("Cole o link da sua nova imagem de perfil:");
+            if(url) document.getElementById('nav-user-img').src = url;
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>
